@@ -7,8 +7,13 @@
     font-family: Arial, Helvetica, sans-serif;
    }
    .board {
-    margin: 3% auto 10%;
+    margin: 3% auto 1%;
     width: 450px;
+   }
+
+   .btn {
+       margin: 0 auto 5%;
+       padding: 20px;
    }
    .board button {
     height:50px;

@@ -3,6 +3,13 @@ var symbol;
 $(function () {
   $(".board button").attr("disabled", true);
   $(".board button").on("click", makeMove);
+  $(".realPlayer").on("click", ()=>{
+    socket.emit("real.player");
+  });
+  $(".bot").on("click", () => {
+    socket.emit("bot");
+
+  });
   // Event is called when either player makes a move
   socket.on("move.made", function (data) {
     // Render the move
@@ -37,10 +44,12 @@ $(function () {
 
   // Set up the initial state when the game begins
   socket.on("game.begin", function (data) {
+    $(".buttons").attr("disabled", true);
     // The server will asign X or O to the player
     symbol = data.symbol;
     // Give X the first turn
     myTurn = symbol === "X";
+    typeOfGame = data.typeOfGame;
     renderTurnMessage();
   });
 
@@ -196,6 +205,7 @@ function makeMove(e) {
   if (!myTurn) {
     return;
   }
+
   // The space is already checked
   if ($(this).text().length) {
     alert("This space is already taken !");
@@ -207,6 +217,7 @@ function makeMove(e) {
     alert("This space is not available !");
     return;
   }
+  
 
   // Emit the move to the server and make available other spaces
 
@@ -226,4 +237,33 @@ function makeMove(e) {
         position: $(this).attr("id"),
     });
 
+    if (typeOfGame === "bot") {
+
+      let spaces = $(".available:empty").map(function() {return this.id}).get();
+      console.log(spaces)
+      let random = Math.floor(Math.random() * spaces.length);
+
+      if($(this).attr("id") === spaces[random]){
+        random = Math.floor(Math.random() * spaces.length);
+      }
+
+    if ($("#"+spaces[random]).hasClass("available left")) {
+      nextId = parseInt($("#"+spaces[random]).attr("id")) + 1;
+      nextClass = "available left";
+   }else if ($("#"+spaces[random]).hasClass("available right")) {
+      nextId = parseInt($("#"+spaces[random]).attr("id")) - 1;
+      nextClass = "available right";
+   }
+    setTimeout ( () => {
+
+      socket.emit("make.move", {
+      nextClass: nextClass,
+      nextId: nextId,
+      symbol: "O",
+      position: spaces[random],
+  })}, 1000);
+    }
+
 }
+
+
